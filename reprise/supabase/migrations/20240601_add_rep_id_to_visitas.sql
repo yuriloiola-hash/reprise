@@ -1,0 +1,1 @@
+ALTER TABLE visitas ADD COLUMN IF NOT EXISTS rep_id UUID NOT NULL REFERENCES auth.users(id);

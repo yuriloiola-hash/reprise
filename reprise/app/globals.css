@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #0047CC;
+  --color-brand-secondary: #00C2FF;
+  --color-brand-bg: #F0F4FA;
+  --color-brand-sidebar: #0A1628;
+  --color-brand-text: #0D1B2A;
+  --color-brand-text-muted: #5A7184;
+  --color-brand-border: #D6E3F0;
+  
+  /* Status Colors */
+  --color-status-planned: #94A3B8;
+  --color-status-pre: #2563EB;
+  --color-status-done: #16A34A;
+  --color-status-late: #DC2626;
+  
+  --color-status-planned-bg: #F1F5F9;
+  --color-status-pre-bg: #EFF6FF;
+  --color-status-done-bg: #F0FDF4;
+  --color-status-late-bg: #FEF2F2;
+
+  --color-status-planned-text: #475569;
+  --color-status-pre-text: #1D4ED8;
+  --color-status-done-text: #15803D;
+  --color-status-late-text: #B91C1C;
+
+  /* Categories */
+  --color-cat1-bg: #FEF3C7;
+  --color-cat1-text: #92400E;
+  --color-cat2-bg: #DBEAFE;
+  --color-cat2-text: #1E40AF;
+  --color-cat3-bg: #E0E7FF;
+  --color-cat3-text: #3730A3;
+  --color-cat4-bg: #F1F5F9;
+  --color-cat4-text: #475569;
+  
+  /* IBM Plex Sans como base de texto — profissional e discreto */
+  --font-sans: var(--font-sans);
+  /* Montserrat como fonte de destaque — títulos, labels, branding */
+  --font-brand: var(--font-montserrat);
+  --font-display: var(--font-montserrat);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+:root {
+  --background: #F0F4FA;
+  --foreground: #0D1B2A;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar Customization */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-brand-border);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-text-muted);
+}
