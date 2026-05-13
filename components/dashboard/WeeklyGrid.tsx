@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 interface WeeklyGridProps {
   visitas: any[];
   diasDaSemana: Date[];
-  onCellClick: (date: string, time: string) => void;
+  onCellClick: (date: string, time: string, visita?: any) => void;
 }
 
 export function WeeklyGrid({ visitas, diasDaSemana, onCellClick }: WeeklyGridProps) {

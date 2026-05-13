@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -266,6 +266,11 @@ export type Database = {
           rep_id: string | null
           resultado: string | null
           status: Database["public"]["Enums"]["status_visita"]
+          nota_propaganda: number | null
+          perfil_risco: number | null
+          perfil_paciencia: number | null
+          perfil_extroversao: number | null
+          perfil_normas: number | null
           sync_id: string | null
           synced_at: string | null
           updated_at: string | null
@@ -286,6 +291,11 @@ export type Database = {
           rep_id?: string | null
           resultado?: string | null
           status?: Database["public"]["Enums"]["status_visita"]
+          nota_propaganda?: number | null
+          perfil_risco?: number | null
+          perfil_paciencia?: number | null
+          perfil_extroversao?: number | null
+          perfil_normas?: number | null
           sync_id?: string | null
           synced_at?: string | null
           updated_at?: string | null
@@ -306,6 +316,11 @@ export type Database = {
           rep_id?: string | null
           resultado?: string | null
           status?: Database["public"]["Enums"]["status_visita"]
+          nota_propaganda?: number | null
+          perfil_risco?: number | null
+          perfil_paciencia?: number | null
+          perfil_extroversao?: number | null
+          perfil_normas?: number | null
           sync_id?: string | null
           synced_at?: string | null
           updated_at?: string | null
@@ -319,6 +334,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      movimentacoes_painel: {
+        Row: {
+          id: string
+          rep_id: string | null
+          tipo: "adicao" | "exclusao"
+          nome_medico: string
+          especialidade: string
+          cidade: string
+          motivo: string
+          status_gd: "aprovado" | "negado" | "pendente"
+          obs_gd: string | null
+          mes: number
+          ano: number
+          data_movimentacao: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          rep_id?: string | null
+          tipo: "adicao" | "exclusao"
+          nome_medico: string
+          especialidade: string
+          cidade: string
+          motivo: string
+          status_gd?: "aprovado" | "negado" | "pendente"
+          obs_gd?: string | null
+          mes: number
+          ano: number
+          data_movimentacao: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          rep_id?: string | null
+          tipo?: "adicao" | "exclusao"
+          nome_medico?: string
+          especialidade?: string
+          cidade?: string
+          motivo?: string
+          status_gd?: "aprovado" | "negado" | "pendente"
+          obs_gd?: string | null
+          mes?: number
+          ano?: number
+          data_movimentacao?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

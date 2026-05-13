@@ -7,7 +7,7 @@ import { MapPin, Clock, Plus } from 'lucide-react';
 interface TimeGridProps {
   visitas: any[];
   hoje: string;
-  onCellClick: (date: string, time: string) => void;
+  onCellClick: (date: string, time: string, visita?: any) => void;
 }
 
 export function TimeGrid({ visitas, hoje, onCellClick }: TimeGridProps) {

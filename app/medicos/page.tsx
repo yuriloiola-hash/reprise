@@ -10,8 +10,8 @@ interface Medico {
   id: string;
   nome: string;
   especialidade: string;
-  clinica: string;
-  local_complexo: string; // Bairro
+  clinica: string | null;
+  local_complexo: string | null; // Bairro
   marcas_chave: string[];
   prescricoes?: any[]; // For table view
 }

@@ -17,7 +17,7 @@ interface Movimentacao {
   cidade: string;
   motivo: string;
   status_gd: 'aprovado' | 'negado' | 'pendente';
-  obs_gd: string;
+  obs_gd: string | null;
   isLocal?: boolean; // Se é uma linha ainda não salva no banco
   isDirty?: boolean; // Se foi editada e precisa sincronizar
 }

@@ -69,7 +69,7 @@ export default function PosVisitaPage({ params }: { params: Promise<{ id: string
       // 1. Atualizar visita
       const { error: visitError } = await supabase.from('visitas').update({
         pos_visita_feita: true,
-        status: 'CONCLUIDO',
+        status: 'POS_FEITA',
         nota_propaganda: notaPropaganda,
         perfil_risco: perfilRisco,
         perfil_paciencia: perfilPaciencia,
@@ -85,7 +85,7 @@ export default function PosVisitaPage({ params }: { params: Promise<{ id: string
         rep_id: user.id,
         medico_id: visita.medico_id,
         visita_id: visitaId,
-        texto: textoInsight,
+        conteudo: textoInsight,
         eh_privado: ehPrivado,
       });
 

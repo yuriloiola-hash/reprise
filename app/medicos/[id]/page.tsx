@@ -52,9 +52,9 @@ export default function MedicoPerfilPage({ params }: { params: Promise<{ id: str
 
         if (v) {
           // Filtrar insights no cliente
-          const visitasComInsightsFiltrados = v.map(vis => ({
+          const visitasComInsightsFiltrados = (v as any[]).map(vis => ({
             ...vis,
-            insights: vis.insights.filter((i: any) => !i.eh_privado || i.rep_id === userId)
+            insights: (vis.insights || []).filter((i: any) => !i.eh_privado || i.rep_id === userId)
           }));
           setVisitas(visitasComInsightsFiltrados);
         }
