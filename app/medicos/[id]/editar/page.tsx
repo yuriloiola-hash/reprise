@@ -3,13 +3,16 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { Database } from '@/lib/database.types';
 import { ChevronLeft, Save, Star, MapPin, Building2, Stethoscope, AlertCircle } from 'lucide-react';
+
+type CategoriaCat = Database['public']['Enums']['categoria_cat'];
 
 const ESPECIALIDADES = [
   'Neurologia', 'Cardiologia', 'Psiquiatria', 'Reumatologia', 'Ortopedia', 'Clínico Geral'
 ];
 
-const CATEGORIAS = ['CAT1', 'CAT2', 'CAT3', 'CAT4'];
+const CATEGORIAS: CategoriaCat[] = ['CAT1', 'CAT2', 'CAT3', 'CAT4', 'MARCAS_CHAVE'];
 
 const BRANDS_BY_SPECIALTY: Record<string, string[]> = {
   Cardiologia: ['Brasart', 'Brasart HCT', 'Brasart BCC', 'Vynaxa 20', 'Vynaxa 2,5', 'Patz SL', 'Somalgin Cardio'],
@@ -33,7 +36,7 @@ export default function EditarMedicoPage({ params }: { params: Promise<{ id: str
     especialidade: '',
     clinica: '',
     local_complexo: '', // Bairro
-    categoria_cat: 'CAT3',
+    categoria_cat: 'CAT3' as CategoriaCat,
     observacoes: ''
   });
 
@@ -53,7 +56,7 @@ export default function EditarMedicoPage({ params }: { params: Promise<{ id: str
           especialidade: data.especialidade,
           clinica: data.clinica || '',
           local_complexo: data.local_complexo || '',
-          categoria_cat: data.categoria_cat || 'CAT3',
+          categoria_cat: (data.categoria_cat as CategoriaCat) || 'CAT3',
           observacoes: data.observacoes || ''
         });
         setSelectedBrands(data.marcas_chave || []);
@@ -183,7 +186,7 @@ export default function EditarMedicoPage({ params }: { params: Promise<{ id: str
                 <select
                   className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-blue-600 outline-none font-bold transition-all appearance-none"
                   value={formData.categoria_cat}
-                  onChange={(e) => setFormData({ ...formData, categoria_cat: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, categoria_cat: e.target.value as CategoriaCat })}
                 >
                   {CATEGORIAS.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>

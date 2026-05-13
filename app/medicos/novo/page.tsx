@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { Database } from '@/lib/database.types';
 import { ChevronLeft, Save, Star, MapPin, Building2, Stethoscope } from 'lucide-react';
+
+type CategoriaCat = Database['public']['Enums']['categoria_cat'];
 
 const ESPECIALIDADES = [
   'Neurologia', 'Cardiologia', 'Psiquiatria', 'Reumatologia', 'Ortopedia', 'Clínico Geral'
@@ -59,7 +62,7 @@ export default function NovoMedicoPage() {
         clinica: formData.clinica || null,
         local_complexo: formData.local_complexo || null, // Bairro
         marcas_chave: selectedBrands,
-        categoria_cat: 'CAT3' // Valor padrão fixo já que removemos do form
+        categoria_cat: 'CAT3' as CategoriaCat // Valor padrão fixo já que removemos do form
       });
 
       if (error) throw error;

@@ -4,7 +4,10 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, MapPin, Edit3 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { Database } from '@/lib/database.types';
 import { calcularStatusVisita } from '@/lib/visitStatus';
+
+type CategoriaCat = Database['public']['Enums']['categoria_cat'];
 import { PotencialTab } from '@/components/medicos/PotencialTab';
 
 export default function MedicoPerfilPage({ params }: { params: Promise<{ id: string }> }) {
@@ -64,7 +67,7 @@ export default function MedicoPerfilPage({ params }: { params: Promise<{ id: str
 
   if (loading) return <div className="p-8 text-center text-brand-text-muted animate-pulse">Carregando perfil...</div>;
 
-  const renderBadge = (cat: string | null) => {
+  const renderBadge = (cat: CategoriaCat | null) => {
     switch (cat) {
       case 'CAT1': return 'bg-[#FEF3C7] text-[#92400E]';
       case 'CAT2': return 'bg-[#DBEAFE] text-[#1E40AF]';
