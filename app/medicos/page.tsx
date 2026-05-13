@@ -20,6 +20,15 @@ const ESPECIALIDADES = ['Todas', 'Neurologia', 'Cardiologia', 'Psiquiatria', 'Re
 const MARCAS_NEURO = ['Todas as Marcas', 'Patz SL', 'Patz Gts', 'Lyberdia Gts', 'Lyberdia Caps', 'Konduz', 'Cymbi'];
 const TRIMESTRES_PADRAO = ['1T26', '4T25', '3T25', '2T25', '1T25'];
 
+const SIRIUS_BRANDS_BY_SPECIALTY: Record<string, string[]> = {
+  Neurologia: ['Patz SL', 'Patz Gts', 'Lyberdia Gts', 'Lyberdia Caps', 'Konduz', 'Cymbi'],
+  Psiquiatria: ['Patz SL', 'Patz Gts', 'Lyberdia Gts', 'Lyberdia Caps', 'Konduz', 'Cymbi'],
+  Cardiologia: ['Brasart', 'Brasart HCT', 'Brasart BCC', 'Vynaxa 20', 'Vynaxa 2,5', 'Patz SL', 'Somalgin Cardio'],
+  Reumatologia: ['Condres Longbio', 'Condres Ultra', 'Konduz', 'Cymbi'],
+  Ortopedia: ['Condres Longbio', 'Condres Ultra', 'Konduz', 'Cymbi'],
+  'Clínico Geral': ['Brasart', 'Patz SL', 'Vynaxa', 'Konduz', 'Cymbi']
+};
+
 export default function MedicosPage() {
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,19 +70,76 @@ export default function MedicosPage() {
     const prevTrimestre = '4T25';
 
     filteredMedicos.forEach(m => {
-      // Define which brands to show for this doctor based on the filter
-      const marcasParaListar = filterMarca === 'Todas as Marcas' 
-        ? (m.marcas_chave || []) 
-        : (m.marcas_chave || []).filter(brand => brand === filterMarca);
+      const fullBrandList = SIRIUS_BRANDS_BY_SPECIALTY[m.especialidade] || [];
 
-      marcasParaListar.forEach(marca => {
-        // Find prescription data for current and previous quarter
+      if (filterMarca === 'Todas as Marcas') {
+        // --- VISÃO CONSOLIDADA (UM MÉDICO POR LINHA) ---
+        let totalN = 0;
+        let totalSirius = 0;
+        let prevTotalN = 0;
+        let prevTotalSirius = 0;
+        let brandStats: { marca: string, minha: number }[] = [];
+
+        fullBrandList.forEach(marca => {
+          const pData = (m.prescricoes || []).find(p => p.trimestre === trimestre && p.marca_sirius === marca);
+          const prevPData = (m.prescricoes || []).find(p => p.trimestre === prevTrimestre && p.marca_sirius === marca);
+          
+          if (pData) {
+            totalN += pData.quantidade_total;
+            totalSirius += pData.quantidade_minha_marca;
+            brandStats.push({ marca, minha: pData.quantidade_minha_marca });
+          }
+          if (prevPData) {
+            prevTotalN += prevPData.quantidade_total;
+            prevTotalSirius += prevPData.quantidade_minha_marca;
+          }
+        });
+
+        const marketShare = totalN > 0 ? (totalSirius / totalN) * 100 : 0;
+        const prevMarketShare = prevTotalN > 0 ? (prevTotalSirius / prevTotalN) * 100 : 0;
+        const deltaShare = marketShare - prevMarketShare;
+
+        // Top 3 marcas mais prescritas
+        const top3 = brandStats
+          .sort((a, b) => b.minha - a.minha)
+          .slice(0, 3)
+          .map(s => s.marca);
+
+        // Sparkline consolidado (Soma de toda a linha)
+        const sparklineData = [...TRIMESTRES_PADRAO].reverse().map(t => {
+          let tSirius = 0, tTotal = 0, tConc = 0;
+          fullBrandList.forEach(marca => {
+            const pt = (m.prescricoes || []).find(p => p.trimestre === t && p.marca_sirius === marca);
+            if (pt) {
+              tSirius += pt.quantidade_minha_marca;
+              tTotal += pt.quantidade_total;
+              tConc += (pt.concorrentes || []).reduce((acc: number, cur: any) => acc + cur.quantidade, 0);
+            }
+          });
+          return { t, sirius: tSirius, conc: tConc, total: tTotal };
+        });
+
+        rows.push({
+          id: m.id,
+          medico_id: m.id,
+          nome: m.nome,
+          especialidade: m.especialidade,
+          marca: top3.length > 0 ? top3 : ['Nenhuma'], // Exibe top 3 marcas
+          isAggregated: true,
+          nTotal: totalN,
+          minhaMarca: totalSirius,
+          marketShare,
+          deltaShare,
+          sparklineData,
+          tags: [] // Sem tags na visão consolidada
+        });
+
+      } else {
+        // --- VISÃO DETALHADA (FILTRO POR MARCA ATIVO) ---
+        const marca = filterMarca;
         const pData = (m.prescricoes || []).find(p => p.trimestre === trimestre && p.marca_sirius === marca);
         const prevPData = (m.prescricoes || []).find(p => p.trimestre === prevTrimestre && p.marca_sirius === marca);
         
-        // If we're filtering by a specific brand, but the doctor doesn't even have it in marcas_chave, we don't show the row.
-        // But if they HAVE it in marcas_chave, we show it even if pData is missing (as 0).
-
         const nTotal = pData?.quantidade_total ?? 0;
         const minhaMarca = pData?.quantidade_minha_marca ?? 0;
         const marketShare = nTotal > 0 ? (minhaMarca / nTotal) * 100 : 0;
@@ -90,40 +156,26 @@ export default function MedicosPage() {
         const sparklineData = [...TRIMESTRES_PADRAO].reverse().map(t => {
           const pt = (m.prescricoes || []).find(p => p.trimestre === t && p.marca_sirius === marca);
           return { 
-            t, 
-            sirius: pt?.quantidade_minha_marca ?? 0, 
+            t, sirius: pt?.quantidade_minha_marca ?? 0, 
             conc: (pt?.concorrentes || []).reduce((acc: number, cur: any) => acc + cur.quantidade, 0), 
             total: pt?.quantidade_total ?? 0 
           };
         });
 
-        // Smart Tags Logic (only when a specific brand is selected)
+        // Smart Tags Logic
         const tags = [];
-        if (filterMarca !== 'Todas as Marcas') {
-          if (marketShare < 30 && nTotal >= 10) {
-            tags.push({ label: 'Potencial de Crescimento', color: 'bg-emerald-50 text-emerald-700 border-emerald-100', icon: <Target size={10} /> });
-          }
-          if (marketShare >= 60) {
-            tags.push({ label: 'Defender Posição', color: 'bg-blue-50 text-brand-primary border-blue-100', icon: <ShieldAlert size={10} /> });
-          }
-          // Alerta Rejeição: Prescreve a categoria mas não Sirius
-          if (nTotal >= 10 && minhaMarca === 0) {
-            tags.push({ label: 'Alerta: Rejeição', color: 'bg-red-50 text-red-600 border-red-100', icon: <AlertCircle size={10} /> });
-          }
-          if (deltaShare > 0.1) {
-            tags.push({ label: 'Ganho de Tração', color: 'bg-green-100 text-green-800 border-green-200', icon: <TrendingUp size={10} /> });
-          }
-          if (deltaShare < -0.1) {
-            tags.push({ label: 'Perda de Share', color: 'bg-orange-50 text-orange-700 border-orange-100', icon: <TrendingDown size={10} /> });
-          }
-        }
+        if (marketShare < 30 && nTotal >= 10) tags.push({ label: 'Potencial de Crescimento', color: 'bg-emerald-50 text-emerald-700 border-emerald-100', icon: <Target size={10} /> });
+        if (marketShare >= 60) tags.push({ label: 'Defender Posição', color: 'bg-blue-50 text-brand-primary border-blue-100', icon: <ShieldAlert size={10} /> });
+        if (nTotal >= 10 && minhaMarca === 0) tags.push({ label: 'Alerta: Rejeição', color: 'bg-red-50 text-red-600 border-red-100', icon: <AlertCircle size={10} /> });
+        if (deltaShare > 0.1) tags.push({ label: 'Ganho de Tração', color: 'bg-green-100 text-green-800 border-green-200', icon: <TrendingUp size={10} /> });
+        if (deltaShare < -0.1) tags.push({ label: 'Perda de Share', color: 'bg-orange-50 text-orange-700 border-orange-100', icon: <TrendingDown size={10} /> });
 
         rows.push({
           id: `${m.id}-${marca}`,
           medico_id: m.id,
           nome: m.nome,
           especialidade: m.especialidade,
-          marca,
+          marca: [marca],
           nTotal,
           minhaMarca,
           topConcorrentes,
@@ -132,7 +184,7 @@ export default function MedicosPage() {
           sparklineData,
           tags
         });
-      });
+      }
     });
 
     if (sortConfig !== null) {
@@ -292,7 +344,7 @@ export default function MedicosPage() {
                       <div className="flex items-center gap-2">Médico <ArrowUpDown size={12} /></div>
                     </th>
                     <th className="p-6 cursor-pointer hover:bg-white transition-colors" onClick={() => handleSort('marca')}>
-                      <div className="flex items-center gap-2">Produto <ArrowUpDown size={12} /></div>
+                      <div className="flex items-center gap-2">{filterMarca === 'Todas as Marcas' ? 'Produtos (Top 3)' : 'Produto'} <ArrowUpDown size={12} /></div>
                     </th>
                     <th className="p-6 cursor-pointer hover:bg-white transition-colors w-24" onClick={() => handleSort('nTotal')}>
                       <div className="flex items-center gap-2">N Total <ArrowUpDown size={12} /></div>
@@ -318,7 +370,7 @@ export default function MedicosPage() {
                           <p className="font-brand font-bold text-brand-text group-hover:text-brand-primary transition-colors">{row.nome}</p>
                           <p className="text-[10px] text-brand-text-muted mt-0.5 uppercase font-bold">{row.especialidade}</p>
                           
-                          {/* Smart Tags Rendering */}
+                          {/* Smart Tags Rendering (Detalhamento por Marca) */}
                           <div className="flex flex-wrap gap-1 mt-2">
                             {row.tags.map((tag: any, idx: number) => (
                               <span key={idx} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-brand font-bold border transition-all ${tag.color}`}>
@@ -330,9 +382,15 @@ export default function MedicosPage() {
                         </Link>
                       </td>
                       <td className="p-6">
-                        <span className="px-3 py-1 bg-white border border-brand-border rounded-lg text-[11px] font-brand font-bold text-brand-text shadow-sm group-hover:border-brand-primary/30 transition-all">
-                          {row.marca}
-                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {row.marca.map((m: string, idx: number) => (
+                            <span key={idx} className={`px-2.5 py-1 rounded-lg text-[10px] font-brand font-bold border transition-all ${
+                              row.isAggregated ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-brand-primary/5 text-brand-primary border-brand-primary/20'
+                            }`}>
+                              {m}
+                            </span>
+                          ))}
+                        </div>
                       </td>
                       <td className="p-6">
                         <span className="font-mono text-sm font-bold text-brand-text">{row.nTotal || '---'}</span>
@@ -342,7 +400,7 @@ export default function MedicosPage() {
                       </td>
                       <td className="p-6">
                         <div className="flex flex-wrap gap-2">
-                          {row.topConcorrentes.length > 0 ? (
+                          {(row.topConcorrentes || []).length > 0 ? (
                             row.topConcorrentes.map((c: any, i: number) => (
                               <span key={i} className="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200">
                                 {c.nome}: <span className="text-brand-text">{c.quantidade}</span>
@@ -391,9 +449,9 @@ export default function MedicosPage() {
             <div className="p-5 bg-brand-sidebar text-[10px] text-slate-400 font-brand font-bold flex justify-between items-center border-t border-white/5">
               <span className="flex items-center gap-2 uppercase tracking-widest">
                 <div className="w-2 h-2 rounded-full bg-brand-primary shadow-[0_0_8px_#0047CC]" />
-                Visão de Inteligência • Trimestre {trimestre}
+                Visão {filterMarca === 'Todas as Marcas' ? 'Consolidada (Top 3)' : 'Detalhada'} • Trimestre {trimestre}
               </span>
-              <span className="uppercase tracking-widest">{tableData.length} registros de prescrição carregados</span>
+              <span className="uppercase tracking-widest">{tableData.length} registros processados</span>
             </div>
           </div>
         )}
