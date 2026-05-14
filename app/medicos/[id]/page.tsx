@@ -7,8 +7,10 @@ import { supabase } from '@/lib/supabase';
 import { Database } from '@/lib/database.types';
 import { calcularStatusVisita } from '@/lib/visitStatus';
 
-type CategoriaCat = Database['public']['Enums']['categoria_cat'];
 import { PotencialTab } from '@/components/medicos/PotencialTab';
+import { MedicoCupons } from '@/components/medicos/MedicoCupons';
+
+type CategoriaCat = Database['public']['Enums']['categoria_cat'];
 
 export default function MedicoPerfilPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -17,7 +19,7 @@ export default function MedicoPerfilPage({ params }: { params: Promise<{ id: str
   const [medico, setMedico] = useState<any>(null);
   const [visitas, setVisitas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'info' | 'potencial'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'potencial' | 'cupons'>('info');
 
   useEffect(() => {
     async function loadData() {
@@ -123,24 +125,34 @@ export default function MedicoPerfilPage({ params }: { params: Promise<{ id: str
         <div className="flex bg-white rounded-xl border border-brand-border p-1 w-full md:w-max mx-auto shadow-sm">
           <button 
             onClick={() => setActiveTab('info')}
-            className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-sans font-medium transition-all ${
+            className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-sans font-medium transition-all ${
               activeTab === 'info' ? 'bg-brand-bg text-brand-text shadow-sm' : 'bg-transparent text-brand-text-muted hover:bg-slate-50'
             }`}
           >
-            Informações & Visitas
+            Informações
+          </button>
+          <button 
+            onClick={() => setActiveTab('cupons')}
+            className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-sans font-medium transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'cupons' ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'bg-transparent text-brand-text-muted hover:bg-slate-50'
+            }`}
+          >
+            🎟️ Cupons
           </button>
           <button 
             onClick={() => setActiveTab('potencial')}
-            className={`flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-sans font-medium transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'potencial' ? 'bg-brand-primary/10 text-brand-primary shadow-sm' : 'bg-transparent text-brand-text-muted hover:bg-slate-50'
+            className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-xs font-sans font-medium transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'potencial' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'bg-transparent text-brand-text-muted hover:bg-slate-50'
             }`}
           >
-            ⚡ Potencial de Mercado
+            ⚡ BI Potencial
           </button>
         </div>
 
         {activeTab === 'potencial' ? (
           <PotencialTab medico={medico} />
+        ) : activeTab === 'cupons' ? (
+          <MedicoCupons medicoId={medicoId} />
         ) : (
           <div className="space-y-6 animate-in fade-in duration-300">
             {/* Observações Permanentes */}

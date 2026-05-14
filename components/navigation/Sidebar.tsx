@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, BarChart3, Settings, LogOut, Building2, FileText, Edit3 } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, Settings, LogOut, Building2, FileText, Edit3, Ticket } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/medicos', label: 'Médicos', icon: Users },
+  { href: '/cupons', label: 'Cupons', icon: Ticket },
   { href: '/clinicas', label: 'Clínicas', icon: Building2 },
   { href: '/desempenho', label: 'Desempenho', icon: BarChart3 },
   { href: '/relatorio', label: 'Relatório', icon: FileText },

@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, BarChart3, Edit3, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, Edit3, FileText, Ticket } from 'lucide-react';
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/', label: 'Início', icon: LayoutDashboard },
   { href: '/medicos', label: 'Médicos', icon: Users },
-  { href: '/anotacoes', label: 'Anotações', icon: Edit3 },
+  { href: '/cupons', label: 'Cupons', icon: Ticket },
   { href: '/desempenho', label: 'Desempenho', icon: BarChart3 },
   { href: '/relatorio', label: 'Relatório', icon: FileText },
 ];

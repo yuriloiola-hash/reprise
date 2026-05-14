@@ -386,6 +386,53 @@ export type Database = {
         }
         Relationships: []
       }
+      cupons: {
+        Row: {
+          id: string
+          medico_id: string | null
+          rep_id: string | null
+          codigo: string
+          produto: string
+          status_entrega: Database["public"]["Enums"]["status_cupom"]
+          tipo_envio: Database["public"]["Enums"]["tipo_envio_cupom"]
+          data_prometida: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          medico_id?: string | null
+          rep_id?: string | null
+          codigo: string
+          produto: string
+          status_entrega?: Database["public"]["Enums"]["status_cupom"]
+          tipo_envio?: Database["public"]["Enums"]["tipo_envio_cupom"]
+          data_prometida?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          medico_id?: string | null
+          rep_id?: string | null
+          codigo?: string
+          produto?: string
+          status_entrega?: Database["public"]["Enums"]["status_cupom"]
+          tipo_envio?: Database["public"]["Enums"]["tipo_envio_cupom"]
+          data_prometida?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cupons_medico_id_fkey"
+            columns: ["medico_id"]
+            isOneToOne: false
+            referencedRelation: "medicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -397,6 +444,8 @@ export type Database = {
       categoria_cat: "CAT1" | "CAT2" | "CAT3" | "CAT4" | "MARCAS_CHAVE"
       categoria_medico: "CAT1" | "CAT2" | "CAT3" | "CAT4"
       status_visita: "PLANEJADO" | "PRE_FEITA" | "POS_FEITA" | "ATRASADO"
+      status_cupom: "prometido" | "entregue"
+      tipo_envio_cupom: "presencial" | "virtual"
     }
     CompositeTypes: {
       [_ in never]: never
