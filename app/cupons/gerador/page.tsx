@@ -1,44 +1,26 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
 import { 
-  Ticket, Download, List, Image as ImageIcon, 
-  Settings2, Loader2, ArrowLeft, RefreshCw,
-  Plus, Check, Share2, Trash2
+  Ticket, Download, List, Settings2, Loader2, ArrowLeft,
+  Plus, Check, Share2, Trash2, Smartphone, Handshake
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function GeradorCupons() {
   const router = useRouter();
   const [cuponsText, setCuponsText] = useState('');
-  const [bgImage, setBgImage] = useState<string | null>('/templates/durma_bem_gts.png');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [viewType, setViewType] = useState<'individual' | 'lista'>('individual');
   
-  // Layout Settings
-  const [qrLeftPos, setQrLeftPos] = useState({ x: 23.5, y: 31, size: 85 });
-  const [qrRightPos, setQrRightPos] = useState({ x: 57.5, y: 31, size: 85 });
-  const [textStartPos, setTextStartPos] = useState({ x: 50, y: 55, size: 45, spacing: 60 });
-  const [showRightQR, setShowRightQR] = useState(true);
-
   const couponRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const cuponsList = cuponsText.split('\n').filter(line => line.trim() !== '');
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => setBgImage(event.target?.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
 
   const generateImage = async (filename: string) => {
     if (!couponRef.current) return;
+    setIsGenerating(true);
     const canvas = await html2canvas(couponRef.current, {
       scale: 3,
       useCORS: true,
@@ -48,215 +30,188 @@ export default function GeradorCupons() {
     link.download = `${filename}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
+    setIsGenerating(false);
   };
 
   return (
-    <div className="bg-[#F4F7FA] min-h-screen pb-20">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-brand-border px-6 py-4 flex items-center justify-between shadow-sm">
+    <div className="bg-[#F8FAFC] min-h-screen">
+      <header className="sticky top-0 z-50 bg-white border-b border-brand-border px-6 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <button onClick={() => router.back()} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
             <ArrowLeft size={20} className="text-slate-600" />
           </button>
           <div>
-            <h1 className="font-brand font-bold text-lg text-brand-text">Gerador Sirius v2</h1>
-            <p className="text-[10px] font-brand font-bold text-brand-primary uppercase tracking-widest text-brand-primary">Cupons Dinâmicos & Listas</p>
+            <h1 className="font-brand font-bold text-lg text-brand-text">Gerador Durma Bem GTS</h1>
+            <p className="text-[10px] font-brand font-bold text-brand-primary uppercase tracking-widest">Layout 100% Digital & Editável</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => generateImage('cartela-cupons')}
-            disabled={isGenerating || !bgImage || cuponsList.length === 0}
-            className="flex items-center gap-2 px-5 py-2.5 bg-brand-primary text-white rounded-xl font-brand font-bold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
-          >
-            <Download size={18} />
-            BAIXAR IMAGEM
-          </button>
-        </div>
+        <button 
+          onClick={() => generateImage('cupom-sirius')}
+          disabled={isGenerating || cuponsList.length === 0}
+          className="flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-xl font-brand font-bold text-sm hover:bg-blue-700 transition-all shadow-lg"
+        >
+          {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+          GERAR IMAGEM
+        </button>
       </header>
 
-      <main className="p-6 max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="p-6 max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Settings Panel */}
+        {/* Settings */}
         <div className="lg:col-span-4 space-y-6">
           <section className="bg-white p-6 rounded-[24px] border border-brand-border shadow-sm space-y-4">
-            <h3 className="flex items-center gap-2 font-brand font-bold text-sm text-brand-text uppercase tracking-wider">
-              <ImageIcon size={18} className="text-brand-primary" /> Fundo do Cupom
-            </h3>
-            <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="aspect-video border-2 border-dashed border-brand-border rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all overflow-hidden relative"
-            >
-              {bgImage ? (
-                <>
-                  <img src={bgImage} className="w-full h-full object-cover opacity-40" alt="Fundo" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/20">
-                    <RefreshCw size={24} className="text-brand-primary" />
-                    <p className="text-[10px] font-bold mt-2">TROCAR FUNDO</p>
-                  </div>
-                </>
-              ) : (
-                <Plus size={24} className="text-slate-300" />
-              )}
+            <div className="flex items-center justify-between">
+              <h3 className="flex items-center gap-2 font-brand font-bold text-sm text-brand-text uppercase tracking-wider">
+                <List size={18} className="text-brand-primary" /> Lista de Cupons
+              </h3>
+              <span className="text-[10px] font-bold text-brand-primary bg-brand-primary/10 px-2 py-1 rounded">
+                {cuponsList.length} CUPONS
+              </span>
             </div>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-          </section>
-
-          <section className="bg-white p-6 rounded-[24px] border border-brand-border shadow-sm space-y-4">
-            <h3 className="flex items-center gap-2 font-brand font-bold text-sm text-brand-text uppercase tracking-wider">
-              <List size={18} className="text-brand-primary" /> Lista de Códigos
-            </h3>
+            <p className="text-[11px] text-brand-text-muted">Um código por linha. Cada linha gerará um campo no cartão.</p>
             <textarea 
-              placeholder="Digite ou cole os códigos...&#10;Um por linha."
-              rows={6}
+              placeholder="Ex:&#10;999123456&#10;999888777"
+              rows={10}
               className="w-full p-4 bg-brand-bg border border-brand-border rounded-2xl text-sm font-mono outline-none focus:ring-2 focus:ring-brand-primary/20"
               value={cuponsText}
               onChange={(e) => setCuponsText(e.target.value)}
             />
           </section>
 
-          <section className="bg-white p-6 rounded-[24px] border border-brand-border shadow-sm space-y-6">
-            <h3 className="flex items-center gap-2 font-brand font-bold text-sm text-brand-text uppercase tracking-wider">
-              <Settings2 size={18} className="text-brand-primary" /> Ajustes Finos
-            </h3>
-            
-            <div className="space-y-4">
-              <div className="p-4 bg-brand-bg rounded-xl space-y-3">
-                <p className="text-[10px] font-brand font-bold text-brand-primary uppercase">Configurações de QR Code</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-brand-text-muted uppercase">Esq. (X %)</label>
-                    <input type="number" step="0.5" value={qrLeftPos.x} onChange={e => setQrLeftPos(p => ({...p, x: Number(e.target.value)}))} className="w-full p-2 rounded-lg border border-brand-border text-xs font-bold" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-brand-text-muted uppercase">Dir. (X %)</label>
-                    <input type="number" step="0.5" value={qrRightPos.x} onChange={e => setQrRightPos(p => ({...p, x: Number(e.target.value)}))} className="w-full p-2 rounded-lg border border-brand-border text-xs font-bold" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <input type="checkbox" checked={showRightQR} onChange={e => setShowRightQR(e.target.checked)} className="accent-brand-primary" />
-                  <label className="text-[10px] font-bold text-brand-text uppercase">Mostrar QR da Direita</label>
-                </div>
-              </div>
-
-              <div className="p-4 bg-brand-bg rounded-xl space-y-3">
-                <p className="text-[10px] font-brand font-bold text-brand-primary uppercase">Configurações de Texto</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-brand-text-muted uppercase">Início Y (%)</label>
-                    <input type="number" step="0.5" value={textStartPos.y} onChange={e => setTextStartPos(p => ({...p, y: Number(e.target.value)}))} className="w-full p-2 rounded-lg border border-brand-border text-xs font-bold" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-brand-text-muted uppercase">Espaçamento (px)</label>
-                    <input type="number" value={textStartPos.spacing} onChange={e => setTextStartPos(p => ({...p, spacing: Number(e.target.value)}))} className="w-full p-2 rounded-lg border border-brand-border text-xs font-bold" />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-brand-text-muted uppercase">Tamanho da Fonte</label>
-                  <input type="range" min="10" max="100" value={textStartPos.size} onChange={e => setTextStartPos(p => ({...p, size: Number(e.target.value)}))} className="w-full accent-brand-primary" />
-                </div>
-              </div>
-            </div>
+          <section className="bg-blue-600 p-6 rounded-[24px] text-white space-y-3">
+            <h4 className="font-brand font-bold text-sm uppercase flex items-center gap-2">
+              <Check size={18} /> Instruções Corrigidas
+            </h4>
+            <p className="text-xs opacity-90 leading-relaxed">
+              O layout agora é gerado via código (HTML/CSS), garantindo que os textos de orientação estejam 100% corretos conforme o manual da EMS.
+            </p>
           </section>
         </div>
 
-        {/* Realtime Preview Panel */}
-        <div className="lg:col-span-8 flex flex-col gap-4">
+        {/* Preview */}
+        <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between px-2">
-            <h3 className="font-brand font-bold text-sm text-brand-text uppercase tracking-wider">Preview da Cartela</h3>
-            <span className="text-[10px] font-sans text-brand-text-muted bg-amber-50 text-amber-700 px-2 py-1 rounded">Os códigos são gerados um abaixo do outro automaticamente</span>
+            <h3 className="font-brand font-bold text-sm text-brand-text uppercase tracking-wider">Preview Digital</h3>
+            <div className="flex bg-white rounded-lg p-1 border border-brand-border">
+              <button 
+                onClick={() => setViewType('individual')}
+                className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all ${viewType === 'individual' ? 'bg-brand-primary text-white' : 'text-brand-text-muted hover:bg-slate-50'}`}
+              >
+                UNITÁRIO
+              </button>
+              <button 
+                onClick={() => setViewType('lista')}
+                className={`px-3 py-1.5 rounded-md text-[10px] font-bold transition-all ${viewType === 'lista' ? 'bg-brand-primary text-white' : 'text-brand-text-muted hover:bg-slate-50'}`}
+              >
+                LISTA COMPLETA
+              </button>
+            </div>
           </div>
 
-          <div className="bg-slate-300 p-12 rounded-[40px] flex items-center justify-center min-h-[600px] shadow-2xl border-4 border-white/50">
-            {bgImage ? (
-              <div 
-                ref={couponRef}
-                className="relative bg-white shadow-2xl overflow-hidden"
-                style={{ width: '800px', aspectRatio: '1.414/1' }} // Proporção mais horizontal
-              >
-                <img src={bgImage} className="w-full h-full object-cover" alt="Template" />
-                
-                {/* QR Code Left */}
-                <div 
-                  className="absolute p-1 bg-white"
-                  style={{ 
-                    left: `${qrLeftPos.x}%`, 
-                    top: `${qrLeftPos.y}%`,
-                    transform: 'translate(-50%, -50%)',
-                    width: `${qrLeftPos.size}px`,
-                    height: `${qrLeftPos.size}px`
-                  }}
-                >
-                  <QRCodeSVG value="https://www.emssaude.com.br/durmabem" size={qrLeftPos.size - 8} />
+          <div className="bg-slate-200 p-8 rounded-[40px] flex items-center justify-center min-h-[600px] border-2 border-brand-border shadow-inner overflow-auto">
+            <div 
+              ref={couponRef}
+              className="relative bg-[#001D4A] p-10 flex flex-col gap-8 shadow-2xl"
+              style={{ width: '900px', minHeight: '600px' }}
+            >
+              {/* Header Branding */}
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex flex-col">
+                  <h2 className="text-[#00D1FF] font-brand font-black text-5xl tracking-tighter leading-none">Patz</h2>
+                  <h3 className="text-white font-brand font-bold text-3xl tracking-wide opacity-80">GTS</h3>
+                </div>
+                <div className="bg-[#00D1FF] px-4 py-1.5 rounded-lg">
+                  <span className="text-[#001D4A] font-brand font-black text-sm uppercase">Durma Bem</span>
+                </div>
+              </div>
+
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-2 gap-10">
+                {/* Paciente Column */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white p-2 rounded-xl shadow-lg">
+                      <QRCodeSVG value="https://www.emssaude.com.br/durmabem" size={80} />
+                    </div>
+                    <div className="text-white">
+                      <p className="text-[10px] font-brand font-bold uppercase tracking-widest text-[#00D1FF]">Paciente</p>
+                      <h4 className="text-lg font-brand font-bold">Orientações</h4>
+                    </div>
+                  </div>
+                  <ol className="text-white/90 space-y-2.5">
+                    {[
+                      "Escaneie o QR Code ou acesse: www.emssaude.com.br/durmabem",
+                      "Preencha o cupom com o código e selecione \"SOL 10MG 20ML\".",
+                      "Finalize o cadastro para conferir a farmácia mais próxima.",
+                      "Apresente o cupom e a receita na farmácia escolhida."
+                    ].map((step, i) => (
+                      <li key={i} className="flex gap-3 text-[11px] font-medium leading-snug">
+                        <span className="flex-shrink-0 w-5 h-5 bg-[#00D1FF] text-[#001D4A] rounded-full flex items-center justify-center font-black text-[10px]">{i + 1}</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
                 </div>
 
-                {/* QR Code Right (Optional) */}
-                {showRightQR && (
-                  <div 
-                    className="absolute p-1 bg-white"
-                    style={{ 
-                      left: `${qrRightPos.x}%`, 
-                      top: `${qrRightPos.y}%`,
-                      transform: 'translate(-50%, -50%)',
-                      width: `${qrRightPos.size}px`,
-                      height: `${qrRightPos.size}px`
-                    }}
-                  >
-                    <QRCodeSVG value="https://www.emssaude.com.br/durmabem" size={qrRightPos.size - 8} />
+                {/* PDV Column */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-white p-2 rounded-xl shadow-lg">
+                      <QRCodeSVG value="https://www.emssaude.com.br/durmabem" size={80} />
+                    </div>
+                    <div className="text-white">
+                      <p className="text-[10px] font-brand font-bold uppercase tracking-widest text-[#00D1FF]">Ponto de Venda</p>
+                      <h4 className="text-lg font-brand font-bold">Farmácia</h4>
+                    </div>
+                  </div>
+                  <ol className="text-white/90 space-y-2.5">
+                    {[
+                      "Acesse: www.portaldadrogaria.com.br",
+                      "Selecione \"Apoio ao Consumidor\" e pesquise o produto.",
+                      "Digite o número do cupom e o CPF do comprador.",
+                      "Finalize para receber os descontos no check-out."
+                    ].map((step, i) => (
+                      <li key={i} className="flex gap-3 text-[11px] font-medium leading-snug">
+                        <span className="flex-shrink-0 w-5 h-5 bg-[#00D1FF] text-[#001D4A] rounded-full flex items-center justify-center font-black text-[10px]">{i + 1}</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+
+              {/* Dynamic Coupon Boxes Area */}
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 py-6">
+                {cuponsList.length > 0 ? (
+                  viewType === 'individual' ? (
+                    <div className="w-full max-w-md bg-white p-6 rounded-[24px] shadow-2xl transform rotate-1 border-4 border-[#00D1FF] flex flex-col items-center justify-center text-center">
+                      <p className="text-[10px] font-brand font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Código do Cupom</p>
+                      <h3 className="text-4xl font-brand font-black text-[#001D4A] tracking-tighter">{cuponsList[0]}</h3>
+                    </div>
+                  ) : (
+                    <div className="w-full grid grid-cols-2 gap-4">
+                      {cuponsList.slice(0, 6).map((code, index) => (
+                        <div key={index} className="bg-white p-4 rounded-2xl shadow-lg border-2 border-[#00D1FF] flex flex-col items-center justify-center text-center">
+                          <p className="text-[8px] font-brand font-bold text-slate-400 uppercase tracking-widest mb-0.5">Cupom {index + 1}</p>
+                          <h3 className="text-2xl font-brand font-black text-[#001D4A]">{code}</h3>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <div className="w-full max-w-md bg-white/10 border-2 border-dashed border-white/20 p-8 rounded-[24px] flex flex-col items-center justify-center">
+                    <Ticket size={40} className="text-white/20 mb-4" />
+                    <p className="text-white/40 font-brand font-bold uppercase text-[10px] tracking-widest">Aguardando códigos...</p>
                   </div>
                 )}
-
-                {/* Dynamic Coupons List */}
-                <div 
-                  className="absolute w-full flex flex-col items-center"
-                  style={{ 
-                    top: `${textStartPos.y}%`,
-                    left: '50%',
-                    transform: 'translateX(-50%)'
-                  }}
-                >
-                  {cuponsList.length > 0 ? cuponsList.map((code, index) => (
-                    <div 
-                      key={index}
-                      className="font-brand font-extrabold text-brand-text text-center"
-                      style={{ 
-                        fontSize: `${textStartPos.size}px`,
-                        height: `${textStartPos.spacing}px`,
-                        lineHeight: `${textStartPos.spacing}px`,
-                        whiteSpace: 'nowrap',
-                        letterSpacing: '0.05em',
-                        marginTop: index > 0 ? '5px' : '0'
-                      }}
-                    >
-                      {code}
-                    </div>
-                  )) : (
-                    <div 
-                      className="font-brand font-extrabold text-slate-300 uppercase opacity-30"
-                      style={{ fontSize: `${textStartPos.size}px` }}
-                    >
-                      AGUARDANDO CÓDIGOS...
-                    </div>
-                  )}
-                </div>
               </div>
-            ) : (
-              <div className="text-center space-y-4">
-                <Ticket size={80} className="text-slate-400 mx-auto animate-bounce" />
-                <p className="text-slate-500 font-brand font-bold uppercase">Carregue o Fundo Sirius</p>
-              </div>
-            )}
-          </div>
 
-          <div className="bg-blue-600 p-6 rounded-3xl text-white shadow-xl shadow-blue-100 flex items-start gap-4">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
-              <Share2 size={20} />
-            </div>
-            <div>
-              <p className="font-brand font-bold text-sm">Pronto para o WhatsApp!</p>
-              <p className="text-xs text-blue-100 mt-1 leading-relaxed">
-                Agora o sistema gera uma única imagem com todos os códigos da lista. Os campos são adicionados automaticamente um abaixo do outro sem sobreposição. 
-                Use os ajustes à esquerda para mover os QR Codes e o bloco de texto conforme o template.
-              </p>
+              {/* Footer */}
+              <div className="mt-auto pt-6 border-t border-white/10">
+                <p className="text-center text-[#00D1FF] font-brand font-bold text-xs uppercase tracking-wide">
+                  Atenção! O desconto é valido apenas para a 1º compra no CPF.
+                </p>
+              </div>
             </div>
           </div>
         </div>
