@@ -310,7 +310,7 @@ export default function CuponsPage() {
       {/* Add Modal */}
       {showAddForm && (
         <AddCupomModal 
-          onClose={() => setShowAddForm(true)} 
+          onClose={() => setShowAddForm(false)} 
           onSuccess={() => {
             setShowAddForm(false);
             fetchCupons();
