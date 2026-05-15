@@ -13,11 +13,11 @@ import { useRouter } from 'next/navigation';
 export default function GeradorCupons() {
   const router = useRouter();
   const [cuponsText, setCuponsText] = useState('');
-  const [bgImage, setBgImage] = useState<string | null>(null);
+  const [bgImage, setBgImage] = useState<string | null>('/templates/durma_bem_gts.png');
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [qrPos, setQrPos] = useState({ x: 80, y: 15, size: 100 }); // % base
-  const [textPos, setTextPos] = useState({ x: 50, y: 55, size: 42 }); // % base
+  const [qrPos, setQrPos] = useState({ x: 22, y: 35, size: 85 }); // Posição para o QR Code da esquerda
+  const [textPos, setTextPos] = useState({ x: 50, y: 55, size: 50 }); // Posição central para o código
   
   const couponRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
