@@ -391,7 +391,9 @@ export type Database = {
           id: string
           medico_id: string | null
           rep_id: string | null
-          codigo: string
+          tipo: Database["public"]["Enums"]["tipo_registro_logistica"]
+          codigo: string | null
+          descricao: string | null
           produto: string
           status_entrega: Database["public"]["Enums"]["status_cupom"]
           tipo_envio: Database["public"]["Enums"]["tipo_envio_cupom"]
@@ -403,7 +405,9 @@ export type Database = {
           id?: string
           medico_id?: string | null
           rep_id?: string | null
-          codigo: string
+          tipo?: Database["public"]["Enums"]["tipo_registro_logistica"]
+          codigo?: string | null
+          descricao?: string | null
           produto: string
           status_entrega?: Database["public"]["Enums"]["status_cupom"]
           tipo_envio?: Database["public"]["Enums"]["tipo_envio_cupom"]
@@ -415,7 +419,9 @@ export type Database = {
           id?: string
           medico_id?: string | null
           rep_id?: string | null
-          codigo?: string
+          tipo?: Database["public"]["Enums"]["tipo_registro_logistica"]
+          codigo?: string | null
+          descricao?: string | null
           produto?: string
           status_entrega?: Database["public"]["Enums"]["status_cupom"]
           tipo_envio?: Database["public"]["Enums"]["tipo_envio_cupom"]
@@ -446,6 +452,7 @@ export type Database = {
       status_visita: "PLANEJADO" | "PRE_FEITA" | "POS_FEITA" | "ATRASADO"
       status_cupom: "prometido" | "entregue"
       tipo_envio_cupom: "presencial" | "virtual"
+      tipo_registro_logistica: "cupom" | "demanda"
     }
     CompositeTypes: {
       [_ in never]: never
