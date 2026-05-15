@@ -3,10 +3,11 @@
 import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { 
   Ticket, Download, List, Settings2, Loader2, ArrowLeft,
   Plus, Check, Share2, Trash2, Smartphone, Handshake,
-  Layers, MessageCircle
+  Layers, MessageCircle, FileDown
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -54,7 +55,7 @@ export default function GeradorCupons() {
     });
   };
 
-  const handleDownload = async () => {
+  const handleDownloadPNG = async () => {
     setIsGenerating(true);
     const canvas = await generateCanvas();
     if (canvas) {
@@ -62,6 +63,22 @@ export default function GeradorCupons() {
       link.download = `cupom-${theme}-${Date.now()}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+    }
+    setIsGenerating(false);
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsGenerating(true);
+    const canvas = await generateCanvas();
+    if (canvas) {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`cupom-${theme}-${Date.now()}.pdf`);
     }
     setIsGenerating(false);
   };
@@ -119,7 +136,15 @@ export default function GeradorCupons() {
             COMPARTILHAR
           </button>
           <button 
-            onClick={handleDownload}
+            onClick={handleDownloadPDF}
+            disabled={isGenerating || cuponsList.length === 0}
+            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-brand font-bold text-sm hover:bg-red-700 transition-all shadow-lg"
+          >
+            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <FileDown size={18} />}
+            SALVAR PDF
+          </button>
+          <button 
+            onClick={handleDownloadPNG}
             disabled={isGenerating || cuponsList.length === 0}
             className="flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-xl font-brand font-bold text-sm hover:bg-blue-700 transition-all shadow-lg"
           >
@@ -196,20 +221,6 @@ export default function GeradorCupons() {
         <div className="lg:col-span-8 space-y-4">
           <div className="flex items-center justify-between px-2">
             <h3 className="font-brand font-bold text-sm text-brand-text uppercase tracking-wider">Preview Final</h3>
-            <div className="flex bg-white rounded-lg p-1 border border-brand-border shadow-sm">
-              <button 
-                onClick={() => setViewType('individual')}
-                className={`px-4 py-1.5 rounded-md text-[10px] font-bold transition-all ${viewType === 'individual' ? 'bg-brand-primary text-white shadow-sm' : 'text-brand-text-muted hover:bg-slate-50'}`}
-              >
-                INDIVIDUAL
-              </button>
-              <button 
-                onClick={() => setViewType('lista')}
-                className={`px-4 py-1.5 rounded-md text-[10px] font-bold transition-all ${viewType === 'lista' ? 'bg-brand-primary text-white shadow-sm' : 'text-brand-text-muted hover:bg-slate-50'}`}
-              >
-                GRID (6)
-              </button>
-            </div>
           </div>
 
           <div className="bg-slate-300 p-8 rounded-[40px] flex items-center justify-center min-h-[600px] border-2 border-brand-border shadow-inner overflow-auto">
@@ -250,19 +261,19 @@ export default function GeradorCupons() {
                   </div>
                   <ol className="text-white/90 space-y-3">
                     {[
-                      "Escaneie o QR Code ou acesse: www.emssaude.com.br/durmabem",
-                      `Preencha o cupom e selecione: "${activeTheme.medText}".`,
-                      "Finalize o cadastro para ver as farmácias próximas.",
-                      "Apresente o cupom e receita para obter o desconto."
+                      "Escaneie o QR Code acima ou acesse: www.emssaude.com.br/durmabem",
+                      `Preencha o campo "Nº do cupom" com código do seu cupom Durma Bem e, na seção "Medicamento", selecione a opção: "${activeTheme.medText}".`,
+                      "Finalize o cadastro preenchendo com os seus dados. Após isso, você poderá conferir a farmácia participante do programa Durma Bem mais próxima de você.",
+                      "Para retirar seu medicamento apresente o cupom e a receita, disponibilizada pelo seu médico, ao atendente da farmácia escolhida."
                     ].map((step, i) => (
                       <li key={i} className="flex gap-4 text-[11px] font-medium leading-relaxed">
                         <span 
-                          className="flex-shrink-0 w-5 h-5 text-[#001D4A] rounded-full flex items-center justify-center font-black text-[10px] shadow-sm"
+                          className="flex-shrink-0 w-5 h-5 text-[#001D4A] rounded-full flex items-center justify-center font-black text-[10px] shadow-sm mt-0.5"
                           style={{ backgroundColor: activeTheme.accent }}
                         >
                           {i + 1}
                         </span>
-                        {step}
+                        <span>{step}</span>
                       </li>
                     ))}
                   </ol>
@@ -281,19 +292,19 @@ export default function GeradorCupons() {
                   </div>
                   <ol className="text-white/90 space-y-3">
                     {[
-                      "Acesse: www.portaldadrogaria.com.br",
-                      "Pesquise o produto Sirius em \"Apoio ao Consumidor\".",
-                      "Insira o número do cupom e o CPF do cliente.",
-                      "Confirme para aplicar o desconto no check-out."
+                      "Acesse o Portal da Drogaria em: www.portaldadrogaria.com.br",
+                      "Selecione o menu \"Apoio ao Consumidor\" e pesquise o produto (código de barras ou nome).",
+                      "Digite o número do cupom de desconto e o CPF do comprador.",
+                      "Finalize o atendimento e informe o número da transação NSU e do cartão para o consumidor receber os descontos no check-out."
                     ].map((step, i) => (
                       <li key={i} className="flex gap-4 text-[11px] font-medium leading-relaxed">
                         <span 
-                          className="flex-shrink-0 w-5 h-5 text-[#001D4A] rounded-full flex items-center justify-center font-black text-[10px] shadow-sm"
+                          className="flex-shrink-0 w-5 h-5 text-[#001D4A] rounded-full flex items-center justify-center font-black text-[10px] shadow-sm mt-0.5"
                           style={{ backgroundColor: activeTheme.accent }}
                         >
                           {i + 1}
                         </span>
-                        {step}
+                        <span>{step}</span>
                       </li>
                     ))}
                   </ol>
@@ -302,28 +313,18 @@ export default function GeradorCupons() {
 
               <div className="flex-1 flex flex-col items-center justify-center gap-4 py-4 min-h-[140px]">
                 {cuponsList.length > 0 ? (
-                  viewType === 'individual' ? (
-                    <div 
-                      className="w-full max-w-md bg-white p-6 rounded-[32px] shadow-2xl flex flex-col items-center justify-center text-center border-4"
-                      style={{ borderColor: activeTheme.accent }}
-                    >
-                      <p className="text-[10px] font-brand font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Código do Cupom</p>
-                      <h3 className="text-5xl font-brand font-black text-[#001D4A] tracking-tighter">{cuponsList[0]}</h3>
-                    </div>
-                  ) : (
-                    <div className="w-full grid grid-cols-2 gap-4">
-                      {cuponsList.slice(0, 6).map((code, index) => (
-                        <div 
-                          key={index} 
-                          className="bg-white p-4 rounded-2xl shadow-lg flex flex-col items-center justify-center text-center border-2"
-                          style={{ borderColor: activeTheme.accent }}
-                        >
-                          <p className="text-[8px] font-brand font-bold text-slate-400 uppercase tracking-widest mb-0.5">Cupom {index + 1}</p>
-                          <h3 className="text-3xl font-brand font-black text-[#001D4A] tracking-tight">{code}</h3>
-                        </div>
-                      ))}
-                    </div>
-                  )
+                  <div className="w-full flex flex-col items-center gap-4">
+                    {cuponsList.map((code, index) => (
+                      <div 
+                        key={index}
+                        className="w-full max-w-md bg-white p-6 rounded-[32px] shadow-2xl flex flex-col items-center justify-center text-center border-4"
+                        style={{ borderColor: activeTheme.accent }}
+                      >
+                        <p className="text-[10px] font-brand font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Código do Cupom {index + 1}</p>
+                        <h3 className="text-4xl font-brand font-black text-[#001D4A] tracking-tighter">{code}</h3>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div className="w-full max-w-md bg-white/5 border-2 border-dashed border-white/20 p-10 rounded-[32px] flex flex-col items-center justify-center">
                     <Ticket size={40} className="text-white/20 mb-4" />
