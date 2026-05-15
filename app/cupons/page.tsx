@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
@@ -15,6 +16,7 @@ type Cupom = Database['public']['Tables']['cupons']['Row'] & {
 };
 
 export default function CuponsPage() {
+  const router = useRouter();
   const [cupons, setCupons] = useState<Cupom[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -116,7 +118,14 @@ export default function CuponsPage() {
             <p className="text-lg text-brand-text-muted font-sans font-medium">Controle de Patz e solicitações médicas.</p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <button 
+              onClick={() => router.push('/cupons/gerador')}
+              className="flex items-center gap-2 px-6 py-3.5 bg-indigo-600 text-white rounded-[14px] font-brand font-bold text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+            >
+              <Ticket size={16} />
+              GERADOR DINÂMICO
+            </button>
             <button 
               onClick={exportCSV}
               className="flex items-center gap-2 px-6 py-3.5 bg-white text-brand-text-muted border border-brand-border rounded-[14px] font-brand font-bold text-xs hover:bg-slate-50 transition-all shadow-sm"
