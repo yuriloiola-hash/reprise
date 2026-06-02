@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Search, MapPin, Stethoscope, ChevronRight, Star, Plus, LayoutGrid, Table2, ArrowUpDown, TrendingUp, TrendingDown, Minus, Target, ShieldAlert, AlertCircle } from 'lucide-react';
+import { Search, MapPin, Stethoscope, ChevronRight, Star, Plus, LayoutGrid, Table2, ArrowUpDown, TrendingUp, TrendingDown, Minus, Target, ShieldAlert, AlertCircle, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import { Sparkline } from '@/components/medicos/Sparkline';
 
@@ -224,13 +224,22 @@ export default function MedicosPage() {
             <p className="text-lg text-brand-text-muted font-sans font-medium">Gestão de contatos e inteligência competitiva Sirius.</p>
           </div>
 
-          <Link 
-            href="/medicos/novo"
-            className="flex items-center gap-2 px-6 py-3.5 bg-brand-primary text-white rounded-[14px] font-brand font-bold text-xs hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
-          >
-            <Plus size={16} />
-            NOVO MÉDICO
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link 
+              href="/medicos/importar"
+              className="flex items-center gap-2 px-5 py-3.5 bg-white border border-brand-border text-brand-text rounded-[14px] font-brand font-bold text-xs hover:bg-brand-bg transition-all shadow-sm"
+            >
+              <UploadCloud size={16} />
+              IMPORTAR
+            </Link>
+            <Link 
+              href="/medicos/novo"
+              className="flex items-center gap-2 px-6 py-3.5 bg-brand-primary text-white rounded-[14px] font-brand font-bold text-xs hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+            >
+              <Plus size={16} />
+              NOVO MÉDICO
+            </Link>
+          </div>
         </header>
 
         {/* Global Controls */}
