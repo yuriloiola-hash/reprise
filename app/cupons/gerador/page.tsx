@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
-import html2canvas from 'html2canvas';
+import { QRCodeCanvas } from 'qrcode.react';
+import { toCanvas } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { 
   Ticket, Download, List, Settings2, Loader2, ArrowLeft,
@@ -48,70 +48,79 @@ export default function GeradorCupons() {
 
   const generateCanvas = async () => {
     if (!couponRef.current) return null;
-    return await html2canvas(couponRef.current, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: null,
+    return await toCanvas(couponRef.current, {
+      pixelRatio: 3,
+      backgroundColor: 'transparent',
     });
   };
 
   const handleDownloadPNG = async () => {
     setIsGenerating(true);
-    const canvas = await generateCanvas();
-    if (canvas) {
-      const link = document.createElement('a');
-      link.download = `cupom-${theme}-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+    try {
+      const canvas = await generateCanvas();
+      if (canvas) {
+        const link = document.createElement('a');
+        link.download = `cupom-${theme}-${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
     }
-    setIsGenerating(false);
   };
 
   const handleDownloadPDF = async () => {
     setIsGenerating(true);
-    const canvas = await generateCanvas();
-    if (canvas) {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`cupom-${theme}-${Date.now()}.pdf`);
+    try {
+      const canvas = await generateCanvas();
+      if (canvas) {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'px',
+          format: [canvas.width, canvas.height]
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`cupom-${theme}-${Date.now()}.pdf`);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
     }
-    setIsGenerating(false);
   };
 
   const handleShare = async () => {
     setIsGenerating(true);
-    const canvas = await generateCanvas();
-    if (canvas) {
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], `cupom-sirius-${theme}.png`, { type: 'image/png' });
-        
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-          try {
+    try {
+      const canvas = await generateCanvas();
+      if (canvas) {
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const file = new File([blob], `cupom-sirius-${theme}.png`, { type: 'image/png' });
+          
+          if (navigator.share && navigator.canShare({ files: [file] })) {
             await navigator.share({
               files: [file],
               title: `Cupom Sirius ${activeTheme.label}`,
               text: `Aqui está o seu cupom para o programa Durma Bem (${activeTheme.label}).`
             });
-          } catch (err) {
-            console.error('Erro ao compartilhar:', err);
+          } else {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `cupom-sirius-${theme}.png`;
+            link.click();
           }
-        } else {
-          // Fallback: download
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `cupom-sirius-${theme}.png`;
-          link.click();
-        }
-      }, 'image/png');
+        }, 'image/png');
+      }
+    } catch (err) {
+      console.error('Erro ao compartilhar:', err);
+    } finally {
+      setIsGenerating(false);
     }
-    setIsGenerating(false);
   };
 
   return (
@@ -225,7 +234,7 @@ export default function GeradorCupons() {
 
           <div className="bg-slate-300 p-8 rounded-[40px] flex items-center justify-center min-h-[600px] border-2 border-brand-border shadow-inner overflow-auto">
             <div 
-              ref={couponRef}
+              id="preview-final"
               className="relative flex flex-col gap-8 shadow-2xl"
               style={{ width: '900px', minHeight: '600px', backgroundColor: activeTheme.bg, padding: '40px' }}
             >
@@ -252,7 +261,7 @@ export default function GeradorCupons() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="bg-white p-2.5 rounded-2xl shadow-xl border-2 border-slate-100">
-                      <QRCodeSVG value={qrUrl} size={80} level="H" />
+                      <QRCodeCanvas value={qrUrl} size={80} level="H" />
                     </div>
                     <div className="text-white">
                       <p className="text-[10px] font-brand font-bold uppercase tracking-[0.2em]" style={{ color: activeTheme.accent }}>Paciente</p>
@@ -283,7 +292,7 @@ export default function GeradorCupons() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="bg-white p-2.5 rounded-2xl shadow-xl border-2 border-slate-100">
-                      <QRCodeSVG value={qrUrl} size={80} level="H" />
+                      <QRCodeCanvas value={qrUrl} size={80} level="H" />
                     </div>
                     <div className="text-white">
                       <p className="text-[10px] font-brand font-bold uppercase tracking-[0.2em]" style={{ color: activeTheme.accent }}>Balconista</p>
