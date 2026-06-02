@@ -172,8 +172,7 @@ export default function NovoMedicoPage() {
     
     const dbMol = catalogoDb.find(m => m.nome === modalData.molecula);
     if (!dbMol) return;
-
-    const { data, error } = await supabase.from('catalogo_marcas').insert({
+    const { data, error } = await (supabase as any).from('catalogo_marcas').insert({
        molecula_id: dbMol.id,
        nome: newCompetitorForm.nome,
        laboratorio: newCompetitorForm.laboratorio,
