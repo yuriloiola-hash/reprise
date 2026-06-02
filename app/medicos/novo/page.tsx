@@ -60,13 +60,13 @@ export default function NovoMedicoPage() {
   // Fetch Catalogo DB
   useEffect(() => {
     async function fetchCatalogo() {
-      const { data: mols } = await (supabase.from('catalogo_moleculas') as any).select('id, nome');
-      const { data: marks } = await (supabase.from('catalogo_marcas') as any).select('*');
+      const { data: mols } = await (supabase as any).from('catalogo_moleculas').select('id, nome');
+      const { data: marks } = await (supabase as any).from('catalogo_marcas').select('*');
       if (mols && marks) {
-        const merged = mols.map(m => ({
+        const merged = mols.map((m: any) => ({
           id: m.id,
           nome: m.nome,
-          marcas: marks.filter(mk => mk.molecula_id === m.id).sort((a,b) => {
+          marcas: marks.filter((mk: any) => mk.molecula_id === m.id).sort((a: any, b: any) => {
             if (a.eh_minhas_marca) return -1;
             if (b.eh_minhas_marca) return 1;
             return 0;
