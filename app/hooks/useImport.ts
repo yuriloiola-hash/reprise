@@ -176,7 +176,8 @@ export function useImport() {
 
       const { _id, dbError, status, ...dbData } = row;
       
-      const { error } = await supabase
+      // Cast needed until `supabase gen types` is re-run after applying 001_medicos_import.sql
+      const { error } = await (supabase as any)
         .from('medicos')
         .upsert(dbData, { onConflict: 'crm' }); // CRM is the immutable unique key
 
