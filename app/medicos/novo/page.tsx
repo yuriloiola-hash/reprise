@@ -281,7 +281,7 @@ export default function NovoMedicoPage() {
       }
 
       if (painelRecords.length > 0) {
-        const { error: painelError } = await supabase.from('painel_prescritivo').insert(painelRecords);
+        const { error: painelError } = await (supabase as any).from('painel_prescritivo').insert(painelRecords);
         if (painelError) throw painelError;
       }
 
